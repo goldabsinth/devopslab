@@ -12,3 +12,8 @@ Thumbs.db
 *.qcow2
 *.raw
 *.vmdk
+*.lock
+# Packer temporary files
+packer/downloaded_iso_path/
+packer/output-*/
+packer/tmp/
