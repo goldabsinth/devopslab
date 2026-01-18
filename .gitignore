@@ -1,0 +1,14 @@
+# Secrets
+packer/secrets.pkrvars.hcl
+terraform/*.tfvars
+# Logs
+*.log
+logs.txt
+# OS
+.DS_Store
+Thumbs.db
+# Большие бинарники
+*.iso
+*.qcow2
+*.raw
+*.vmdk
