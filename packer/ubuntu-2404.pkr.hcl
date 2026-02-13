@@ -15,13 +15,13 @@ packer {
 variable "proxmox_url" {
   type        = string
   description = "The Proxmox API URL"
-  default     = "https://192.168.1.95:8006/api2/json"
+  default     = "https://192.168.0.95:8006/api2/json"
 }
 
 variable "proxmox_username" {
   type        = string
   description = "The Proxmox username for API operations"
-  default     = "root@pam!terraform"
+  default     = "root@pam!packer"
 }
 
 variable "proxmox_token" {
@@ -47,13 +47,13 @@ variable "vm_id" {
 variable "iso_file" {
   type        = string
   description = "The ISO file to use for installation"
-  default     = "local:iso/ubuntu-24.04.2-live-server-amd64.iso"
+  default     = "local:iso/ubuntu-24.04.3-live-server-amd64.iso"
 }
 
 variable "iso_checksum" {
   type        = string
   description = "The checksum for the ISO file"
-  default     = "sha256:45f9ddf5b54cb51a0badcd27d633e587e6f176762d7cda49862095d92dfd2055"
+  default     = "c3514bf0056180d09376462a7a1b4f213c1d6e8ea67fae5c25099c6fd3d8274b"
 }
 
 # VM Credentials
@@ -189,41 +189,41 @@ build {
   }
 
   # Install Docker
-  provisioner "shell" {
-    inline = [
-      "echo 'Installing Docker...'",
-      "# Add Docker's official GPG key",
-      "sudo apt-get update",
-      "sudo apt-get install -y ca-certificates curl gnupg",
-      "sudo install -m 0755 -d /etc/apt/keyrings",
-      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
-      "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
+ # provisioner "shell" {
+  #  inline = [
+  #    "echo 'Installing Docker...'",
+  #    "# Add Docker's official GPG key",
+  #    "sudo apt-get update",
+  #    "sudo apt-get install -y ca-certificates curl gnupg",
+  #    "sudo install -m 0755 -d /etc/apt/keyrings",
+  #    "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
+  #    "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
 
-      "# Add the Docker repository",
-      "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+  #    "# Add the Docker repository",
+  #    "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
 
-      "# Pin Docker version",
-      "echo 'Package: docker-ce' | sudo tee /etc/apt/preferences.d/docker-ce",
-      "echo 'Pin: version 5:27.5.1*' | sudo tee -a /etc/apt/preferences.d/docker-ce",
-      "echo 'Pin-Priority: 999' | sudo tee -a /etc/apt/preferences.d/docker-ce",
+  #    "# Pin Docker version",
+  #    "echo 'Package: docker-ce' | sudo tee /etc/apt/preferences.d/docker-ce",
+  #    "echo 'Pin: version 5:27.5.1*' | sudo tee -a /etc/apt/preferences.d/docker-ce",
+  #    "echo 'Pin-Priority: 999' | sudo tee -a /etc/apt/preferences.d/docker-ce",
 
-      "# Install Docker",
-      "sudo apt-get update",
-      "sudo apt-get install -y docker-ce=5:27.5.1* docker-ce-cli=5:27.5.1* containerd.io docker-buildx-plugin docker-compose-plugin",
+  #    "# Install Docker",
+  #    "sudo apt-get update",
+  #    "sudo apt-get install -y docker-ce=5:27.5.1* docker-ce-cli=5:27.5.1* containerd.io docker-buildx-plugin docker-compose-plugin",
 
-      "# Add ubuntu user to docker group",
-      "sudo usermod -aG docker ubuntu",
+  #    "# Add ubuntu user to docker group",
+  #    "sudo usermod -aG docker ubuntu",
 
-      "# Enable Docker service",
-      "sudo systemctl enable docker",
+  #    "# Enable Docker service",
+  #    "sudo systemctl enable docker",
 
-      "# Verify installation",
-      "docker --version",
-      "docker compose version",
+  #    "# Verify installation",
+  #    "docker --version",
+  #    "docker compose version",
 
-      "echo 'Docker installation complete!'"
-    ]
-  }
+  #    "echo 'Docker installation complete!'"
+  #  ]
+#  }
 
   # Added provisioner to forcibly eject ISO and prepare for reboot
   provisioner "shell" {
