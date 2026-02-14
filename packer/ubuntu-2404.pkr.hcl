@@ -15,7 +15,7 @@ packer {
 variable "proxmox_url" {
   type        = string
   description = "The Proxmox API URL"
-  default     = "https://192.168.0.95:8006/api2/json"
+  default     = "https://192.168.0.135:8006/api2/json"
 }
 
 variable "proxmox_username" {
@@ -129,6 +129,7 @@ source "proxmox-iso" "ubuntu-2404" {
     model    = "virtio"
     bridge   = "vmbr0"
     firewall = false
+    mac_address = ""  # ← ДОБАВИТЬ ЭТУ СТРОКУ
   }
 
   # VM Cloud-Init Settings
@@ -240,6 +241,9 @@ build {
       "sudo update-grub",
       "echo 'Clearing cloud-init status to ensure fresh start on first boot...'",
       "sudo cloud-init clean --logs",
+      "echo 'Clearing machine-id to ensure uniqueness...'",  # ← ДОБАВИТЬ
+      "sudo truncate -s 0 /etc/machine-id",                 # ← ДОБАВИТЬ
+      "sudo rm -f /var/lib/dbus/machine-id",               # ← ДОБАВИТЬ
       "echo 'Installation and cleanup completed successfully!'"
     ]
     expect_disconnect = true

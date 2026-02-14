@@ -7,19 +7,13 @@ autoinstall:
   identity:
     hostname: ubuntu-server
     username: ubuntu
-    password: "$6$rounds=4096$ntlX/dlo6b$HXaLN4RcLIGaEDdQdR2VTYi9pslSeXWL131MqaakqE285Nv0kW9KRontQYivCbycZerUMcjVsuLl2V8bbdadI1"
+    password: "$y$j9T$ErTgeZ0aH0sZdDTbk6C0H0$XgqVXsTdx5cxe3E/C92vVRNbj4kbarN1/pjsV6Lm4TB"
   ssh:
     install-server: true
     allow-pw: true
     ssh_quiet_keygen: true
   network:
-    version: 2
-    ethernets:
-      any:
-        match:
-          name: en*
-        dhcp4: true
-        dhcp6: false
+   ??????????????????????????
   packages:
     - qemu-guest-agent
     - sudo
