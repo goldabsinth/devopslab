@@ -33,7 +33,7 @@ variable "proxmox_token" {
 variable "proxmox_node" {
   type        = string
   description = "The Proxmox node to build on"
-  default     = "proxmox"
+  default     = "pve"
 }
 
 # VM Identification
