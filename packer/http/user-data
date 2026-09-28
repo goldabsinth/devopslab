@@ -12,6 +12,8 @@ autoinstall:
     install-server: true
     allow-pw: true
     ssh_quiet_keygen: true
+    authorized_keys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDluam8Vtj2aJIIqrH54lcV7upayvPJ7ql0qqaaS9Y4FIZU0hozdmgLJKDfZiJogYEXT8UGCK1i31N9S5bCA+y2Z3zNUTSZzPrlh34OYf/MDy7Lp2C+8Nvg0PJBp02Wf1cTP6njADJJh/gckg8sRdPVuAJd330D5zCNMA1B8I6Z3GcTOhsAhZ0ElRjov7xTPzdFQdxY4p/6Ss45PrxsgP35gGVfn4FNKTyDknm9EuXQ+d5vWNwCr4+3pFzxKaIW5/G0mwx4AthpEJyhVexWU65u2jzko1gKLfhM9UlQF3SgSY2LQvEPwx33Pik4y+66DU/kf/3Visit4InYBp02vxtTf7GflN45rj/FRTYSWsMPjxYz4IAprYG6H3piWZpOUW0nDNK9awydtpa1CA/Pca3Ux7j8s16YorbIhnKTaC4GGmG87sI+ApgvD5hTthP/vzzgdUhPd3MiHQImynoCtN8PTpZYMSKHnjW5+OjCbqNKGL5DtTzSVAxQiIQ5AXHJoppK/UKKXvNIyV/7kMtN+20spRI0qQ11dGVV51+CW5NullpQdSPOnMAb1odwplncSunTPb95aieQqIWgwvqzqsZBAiBXhFnlIvQwyRVRRkf7WA5N9i9+cOxT0xPA5kzRjcKE+qGa6DDxB2ORTMioU2Ym0shtxniG+rZmTQCSL8DkmQ== root@pve"
   network:
     version: 2
     ethernets:

@@ -1,5 +1,5 @@
 # terraform/proxmox/variables.tf
-variable "proxmox_token" {
+variable "proxmox_api_token" {
   description = "Proxmox API token secret"
   type        = string
   sensitive   = true
