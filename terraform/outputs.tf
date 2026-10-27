@@ -1,9 +1,11 @@
-output "vm_ip" {
-  value       = proxmox_virtual_environment_vm.web.ipv4_addresses[0][0]
-  description = "Primary IPv4 of web-01"
+output "vm_ips" {
+  description = "IP addresses of the created VMs"
+  value = {
+    for k, v in proxmox_virtual_environment_vm.pam_vms : k => v.ipv4_addresses[0][0]
+  }
 }
 
-output "ssh_key_path" {
-  value       = "~/.ssh/id_ed25519"  # путь к приватному ключу
-  description = "Path to SSH private key"
+output "domain_controller_ip" {
+  description = "IP of the Active Directory Domain Controller (placeholder)"
+  value       = "192.168.0.216" # Заглушка, пока AD не поднят
 }

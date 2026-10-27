@@ -15,7 +15,7 @@ packer {
 variable "proxmox_url" {
   type        = string
   description = "The Proxmox API URL"
-  default     = "https://192.168.0.135:8006/api2/json"
+  default     = "https://192.168.0.134:8006/api2/json"
 }
 
 variable "proxmox_username" {
@@ -36,6 +36,11 @@ variable "proxmox_node" {
   default     = "pve"
 }
 
+variable "ssh_public_key" {
+  type        = string
+  description = "Public SSH key to inject into the template"
+  default     = ""
+}
 # VM Identification
 variable "vm_id" {
   type        = string
@@ -129,7 +134,6 @@ source "proxmox-iso" "ubuntu-2404" {
     model    = "virtio"
     bridge   = "vmbr0"
     firewall = false
-    mac_address = ""  # ← ДОБАВИТЬ ЭТУ СТРОКУ
   }
 
   # VM Cloud-Init Settings
@@ -156,7 +160,7 @@ source "proxmox-iso" "ubuntu-2404" {
     "<esc><wait>",
     "e<wait>",
     "<down><down><down><end>",
-    " autoinstall quiet ds=nocloud",
+    " autoinstall quiet ds=nocloud ip=dhcp",
     "<f10><wait>",
     "<wait1m>",
     "yes<enter>"
@@ -178,14 +182,22 @@ build {
 
   # Provisioning the VM Template
   provisioner "shell" {
+    execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'"
     inline = [
       "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
+      "mkdir -p /home/ubuntu/.ssh && chmod 700 /home/ubuntu/.ssh",
+      "echo '${var.ssh_public_key}' >> /home/ubuntu/.ssh/authorized_keys",
+      "chmod 600 /home/ubuntu/.ssh/authorized_keys",
+      "chown -R ubuntu:ubuntu /home/ubuntu/.ssh",
+      "echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/ubuntu",
+      "chmod 440 /etc/sudoers.d/ubuntu",
+      "rm -f /etc/cloud/cloud-init.disabled",
       "sudo systemctl enable qemu-guest-agent",
       "sudo systemctl start qemu-guest-agent",
       "sudo cloud-init clean",
       "sudo rm -f /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg",
       "sudo rm -f /etc/netplan/00-installer-config.yaml",
-      "echo 'Ubuntu 24.04 Template by Packer - Creation Date: $(date)' | sudo tee /etc/issue"
+      "echo \"Ubuntu 24.04 Template by Packer - Creation Date: $$(date)\" | sudo tee /etc/issue"
     ]
   }
 
@@ -228,6 +240,7 @@ build {
 
   # Added provisioner to forcibly eject ISO and prepare for reboot
   provisioner "shell" {
+    execute_command = "echo '${var.ssh_password}' | {{ .Vars }} sudo -E -S bash '{{ .Path }}'"
     inline = [
       "echo 'Completed installation. Preparing for template conversion...'",
       "echo 'Ejecting CD-ROM devices...'",
@@ -241,11 +254,10 @@ build {
       "sudo update-grub",
       "echo 'Clearing cloud-init status to ensure fresh start on first boot...'",
       "sudo cloud-init clean --logs",
-      "echo 'Clearing machine-id to ensure uniqueness...'",  # ← ДОБАВИТЬ
-      "sudo truncate -s 0 /etc/machine-id",                 # ← ДОБАВИТЬ
-      "sudo rm -f /var/lib/dbus/machine-id",               # ← ДОБАВИТЬ
+      "echo 'Clearing machine-id to ensure uniqueness...'",
+      "sudo truncate -s 0 /etc/machine-id",
+      "sudo rm -f /var/lib/dbus/machine-id", 
       "echo 'Installation and cleanup completed successfully!'"
     ]
-    expect_disconnect = true
   }
 }

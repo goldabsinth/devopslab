@@ -1,6 +1,17 @@
-# Secrets
+# --- Packer ---
+# Исключаем реальные секреты (оставляем только example)
 packer/secrets.pkrvars.hcl
-terraform/*.tfvars
+# Исключаем все бэкапы/сейвы (user-data.save, secrets.save и т.д.)
+*.save
+
+# --- Terraform ---
+# Файлы состояния и планы (никогда не хранятся в git)
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/tfplan
+terraform/.terraform/
+.terraform.lock.hcl
+
 # Logs
 *.log
 logs.txt
@@ -17,3 +28,13 @@ Thumbs.db
 packer/downloaded_iso_path/
 packer/output-*/
 packer/tmp/
+
+# --- Чувствительные данные (НИКОГДА не коммитить) ---
+packer/variables.pkrvars.hcl
+packer/secrets.pkrvars.hcl
+packer/http/user-data
+packer/http/user-data.save
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/tfplan
+.terraform/

@@ -1,84 +1,77 @@
-terraform {
-  required_providers {
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "= 0.102.0"  # точная версия, которую вы установили
-    }
+# 1. Создаем cloud-init конфиги для каждой ВМ
+resource "proxmox_virtual_environment_file" "cloud_config" {
+  for_each = var.vms
+
+  content_type = "snippets"
+  datastore_id = "local"
+  node_name    = var.node_name
+
+  source_raw {
+    data = templatefile("${path.module}/cloud-init.yml.tpl", {
+      hostname       = each.key
+      ssh_public_key = var.ssh_public_key
+    })
+    file_name = "cloud-init-${each.key}.yml"
   }
 }
 
-# ✅ Провайдер: новый синтаксис
-provider "proxmox" {
-  endpoint  = "https://192.168.0.135:8006"  
-  api_token = var.proxmox_api_token          
-  insecure  = true                           
+resource "proxmox_virtual_environment_file" "network_config" {
+  for_each = var.vms
+
+  content_type = "snippets"
+  datastore_id = "local"
+  node_name    = var.node_name
+
+  source_raw {
+    data = templatefile("${path.module}/network-config.yml.tpl", {
+      ip_address  = each.value.ip_address
+      gateway_ip  = var.gateway_ip
+      dns_servers = var.dns_servers
+    })
+    file_name = "network-config-${each.key}.yml"
+  }
 }
 
-# ✅ Ресурс: новый тип и синтаксис
-resource "proxmox_virtual_environment_vm" "web" {
-  name      = "web-01"
-  node_name = "pve"   
-  vm_id     = 102
+# 2. Создаем ВМ
+resource "proxmox_virtual_environment_vm" "pam_vms" {
+  for_each = var.vms
 
-  # Клонирование из шаблона (блок, а не строка!)
+  name      = each.key
+  node_name = var.node_name
+  tags      = ["pam-lab", each.key]
+
   clone {
     vm_id = 9001
   }
 
-  # CPU
   cpu {
-    cores = 2
+    cores = each.value.cpu_cores
     type  = "host"
   }
 
-  # Память
   memory {
-    dedicated = 2048
+    dedicated = each.value.memory_mb
   }
 
-  # Сеть
+  disk {
+    datastore_id = var.datastore_id
+    interface    = "scsi0"
+    size         = each.value.disk_size
+  }
+
+  initialization {
+        
+    user_data_file_id    = proxmox_virtual_environment_file.cloud_config[each.key].id
+    network_data_file_id = proxmox_virtual_environment_file.network_config[each.key].id
+  }  
+
   network_device {
     bridge = "vmbr0"
-    model  = "virtio"
   }
 
-  # Диск
-  disk {
-    datastore_id = "local-lvm"
-    size         = 15
-    interface    = "scsi0" 
+  agent {
+    enabled = true
   }
 
-  # ✅ Cloud-init: отдельный блок (вместо ipconfig0/sshkeys/ciuser)
-  initialization {
-    user_account {
-      username = "ubuntu"
-      password = "ubuntu"
-      keys     = [var.ssh_public_key]
-    }
-    ip_config {
-      ipv4 {
-        address = "dhcp"
-      }
-    }
-  }
-
-  # Игнорируем изменения, которые Proxmox может делать сам
-  lifecycle {
-    ignore_changes = [
-      network_device,
-      disk,
-    ]
-  }
-}
-
-# ✅ Output для удобства
-output "web_vm_ip" {
-  value       = proxmox_virtual_environment_vm.web.ipv4_addresses[0][0]
-  description = "Primary IPv4 address of web-01"
-}
-
-output "web_vm_ssh" {
-  value       = "ssh ubuntu@${proxmox_virtual_environment_vm.web.ipv4_addresses[0][0]}"
-  description = "SSH command to connect to web-01"
+  on_boot = true
 }
