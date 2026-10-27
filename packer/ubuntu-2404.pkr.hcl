@@ -15,13 +15,13 @@ packer {
 variable "proxmox_url" {
   type        = string
   description = "The Proxmox API URL"
-  default     = "https://192.168.0.134:8006/api2/json"
+  default     = "https://*.*.*.*:8006/api2/json"
 }
 
 variable "proxmox_username" {
   type        = string
   description = "The Proxmox username for API operations"
-  default     = "root@pam!packer"
+  default     = "***"
 }
 
 variable "proxmox_token" {
