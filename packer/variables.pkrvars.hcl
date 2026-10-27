@@ -1,0 +1,7 @@
+proxmox_url      = "***"
+proxmox_username = "***"
+vm_id        = "9001"
+iso_file     = "local:iso/ubuntu-24.04.3-live-server-amd64.iso"
+ssh_username = "ubuntu"
+proxmox_node = "pve"
+ssh_public_key = "***"
