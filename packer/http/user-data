@@ -1,0 +1,74 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US
+  keyboard:
+    layout: us
+  identity:
+    hostname: ubuntu-server
+    username: ubuntu
+    password: "***хеш"
+  ssh:
+    install-server: true
+    allow-pw: true
+    ssh_quiet_keygen: true
+    authorized_keys:
+      - "***"
+  network:
+    version: 2
+    ethernets:
+      ens18:
+        dhcp4: true
+        dhcp6: false
+        nameservers:
+          addresses: [8.8.8.8, 1.1.1.1]
+  packages:
+    - qemu-guest-agent
+    - sudo
+    - openssh-server
+    - net-tools
+    - perl
+    - open-iscsi
+    - curl
+    - vim
+    - ifupdown
+    - zip
+    - unzip
+    - gnupg2
+    - software-properties-common
+    - apt-transport-https
+    - ca-certificates
+    - lsb-release
+    - python3-pip
+    - jq
+    - cloud-init
+  storage:
+    layout:
+      name: direct
+    swap:
+      size: 0
+    user-data:
+      users:
+        - name: ubuntu
+          lock_passwd: false
+          sudo: ALL=(ALL) NOPASSWD:ALL
+          ssh_authorized_keys:
+            - "***"
+      ssh_pwauth: true
+      package_upgrade: false
+      timezone: UTC
+      disable_root: false
+
+    late-commands:
+      - echo 'ubuntu:хеш пароля' | chroot /target chpasswd -e
+      - mkdir -p /target/home/ubuntu/.ssh
+      - echo 'ссш ключ - только это работает' > /target/home/ubuntu/.ssh/authorized_keys
+      - chmod 700 /target/home/ubuntu/.ssh
+      - chmod 600 /target/home/ubuntu/.ssh/authorized_keys
+      - chown -R ubuntu:ubuntu /target/home/ubuntu/.ssh
+      - echo 'ssh_pwauth: true' > /target/etc/cloud/cloud.cfg.d/05-packer.cfg
+      - echo 'disable_root: false' >> /target/etc/cloud/cloud.cfg.d/05-packer.cfg
+      - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
+      - chmod 440 /target/etc/sudoers.d/ubuntu
+      - rm -f /target/etc/cloud/cloud-init.disabled
+      - curtin in-target --target=/target -- systemctl enable ssh
